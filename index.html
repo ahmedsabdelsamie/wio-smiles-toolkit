@@ -1331,7 +1331,6 @@ Great having you on board! 🚀</div>
       <p>Paste your Google Apps Script Web App URL below to enable shared team lead tracking. This only needs to be done once per device.</p>
       <input class="setup-input" id="script-url-input" type="url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" />
       <button class="setup-btn" onclick="saveScriptUrl()">Connect Sheet</button>
-      <p style="margin-top:14px; font-size:11px; color:rgba(255,255,255,0.3);">Don't have a script URL yet? Follow the setup guide below ↓</p>
     </div>
 
     <!-- Live tracker — shown once connected -->
@@ -1396,100 +1395,6 @@ Great having you on board! 🚀</div>
       </div>
     </div>
 
-    <div class="divider"></div>
-
-    <!-- Setup Guide -->
-    <div class="card" id="setup-guide">
-      <div class="card-header">
-        <div class="card-icon">📖</div>
-        <div>
-          <div class="card-title">Setup Guide — Google Sheet + GitHub Pages</div>
-          <div class="card-subtitle">One-time setup, takes about 15 minutes</div>
-        </div>
-      </div>
-
-      <div style="font-size:13px; line-height:1.8; color:rgba(255,255,255,0.8);">
-
-        <div style="font-family:'Syne',sans-serif; font-weight:700; color:var(--wio-purple-mid); font-size:13px; margin-bottom:10px; margin-top:4px;">PART 1 — Create the Google Sheet & Script</div>
-
-        <ul class="usp-list">
-          <li class="usp-item"><div class="usp-dot" style="background:var(--success);"></div><div class="usp-text"><strong>Step 1:</strong> Go to <strong>sheets.google.com</strong> and create a new spreadsheet. Name it <em>Wio Smiles Leads</em>.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--success);"></div><div class="usp-text"><strong>Step 2:</strong> In Row 1, add these headers exactly in columns A–G:<br><code style="background:rgba(255,255,255,0.07); padding:2px 8px; border-radius:4px; font-size:12px;">Timestamp | Restaurant | Contact | Phone | Status | Agent | Notes</code></div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--success);"></div><div class="usp-text"><strong>Step 3:</strong> Click <strong>Extensions → Apps Script</strong>. Delete any existing code and paste the script below.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--success);"></div><div class="usp-text"><strong>Step 4:</strong> Click <strong>Deploy → New deployment</strong>. Set type to <em>Web app</em>, Execute as <em>Me</em>, Who has access <em>Anyone</em>. Click Deploy and copy the Web App URL.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--success);"></div><div class="usp-text"><strong>Step 5:</strong> Paste that URL into the "Connect to your Google Sheet" box above.</div></li>
-        </ul>
-
-        <div style="margin: 20px 0 10px; font-family:'Syne',sans-serif; font-weight:700; color:var(--wio-purple-mid); font-size:13px;">Google Apps Script — Copy this entire block:</div>
-        <div style="position:relative;">
-          <pre id="apps-script-code" style="background:var(--dark-2); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:16px; font-size:11.5px; line-height:1.7; overflow-x:auto; color:rgba(255,255,255,0.75); white-space:pre-wrap; word-break:break-word;">const SHEET_NAME = 'Sheet1';
-const AGENTS = ['Agent 1','Agent 2','Agent 3']; // ← Edit these names
-
-function doGet(e) {
-  const action = e.parameter.action;
-  if (action === 'getLeads') return getLeads();
-  if (action === 'getAgents') return getAgents();
-  return ContentService.createTextOutput(JSON.stringify({error:'Unknown action'})).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  const data = JSON.parse(e.postData.contents);
-  if (data.action === 'addLead') return addLead(data);
-  return ContentService.createTextOutput(JSON.stringify({error:'Unknown action'})).setMimeType(ContentService.MimeType.JSON);
-}
-
-function getLeads() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  const rows = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  const leads = rows.slice(1).map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
-    return obj;
-  }).reverse();
-  return ContentService.createTextOutput(JSON.stringify({leads})).setMimeType(ContentService.MimeType.JSON);
-}
-
-function getAgents() {
-  return ContentService.createTextOutput(JSON.stringify({agents: AGENTS})).setMimeType(ContentService.MimeType.JSON);
-}
-
-function addLead(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  sheet.appendRow([
-    new Date().toLocaleString('en-AE', {timeZone:'Asia/Dubai'}),
-    data.restaurant || '',
-    data.contact || '',
-    data.phone || '',
-    data.status || 'New',
-    data.agent || '',
-    data.notes || ''
-  ]);
-  return ContentService.createTextOutput(JSON.stringify({success:true})).setMimeType(ContentService.MimeType.JSON);
-}</pre>
-          <button class="copy-btn" onclick="copyScript(this)" style="margin-top:8px;">📋 Copy script</button>
-        </div>
-
-        <div style="font-family:'Syne',sans-serif; font-weight:700; color:var(--wio-purple-mid); font-size:13px; margin:24px 0 10px;">PART 2 — Publish to GitHub Pages</div>
-
-        <ul class="usp-list">
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 1:</strong> Go to <strong>github.com</strong> and create a free account if you don't have one.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 2:</strong> Create a new repository — name it something like <em>wio-smiles-toolkit</em>. Set it to <strong>Public</strong>.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 3:</strong> Click <strong>Add file → Upload files</strong>. Upload the <em>wio_smiles_agent_toolkit.html</em> file. <strong>Rename it to index.html</strong> before uploading, or rename it after upload.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 4:</strong> Go to <strong>Settings → Pages</strong>. Under "Branch", select <em>main</em> and click Save.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 5:</strong> After ~2 minutes, your toolkit will be live at:<br><code style="background:rgba(255,255,255,0.07); padding:2px 8px; border-radius:4px; font-size:12px;">https://YOUR-USERNAME.github.io/wio-smiles-toolkit</code><br>Share this URL with all agents.</div></li>
-          <li class="usp-item"><div class="usp-dot" style="background:var(--wio-purple);"></div><div class="usp-text"><strong>Step 6:</strong> Each agent opens the link, goes to My Leads, pastes the Google Apps Script URL, and selects their name. Done!</div></li>
-        </ul>
-
-        <div class="info-box" style="margin-top:16px;">
-          💡 <strong>Tip:</strong> Bookmark the link on agents' phones. On iPhone, tap Share → Add to Home Screen for an app-like icon. On Android, tap the browser menu → Add to Home Screen.
-        </div>
-        <div class="warn-box">
-          ⚠️ <strong>Important:</strong> Edit the <code>AGENTS</code> list in the Apps Script (line 2) to include your actual agent names before deploying. After editing agent names, re-deploy with a <em>new deployment</em> and share the updated URL.
-        </div>
-
-      </div>
-    </div>
   </div>
 
 </div>
@@ -1511,14 +1416,6 @@ function addLead(data) {
       btn.textContent = '✅ Copied!';
       btn.classList.add('copied');
       setTimeout(() => { btn.innerHTML = '📋 Copy message'; btn.classList.remove('copied'); }, 2000);
-    });
-  }
-
-  function copyScript(btn) {
-    navigator.clipboard.writeText(document.getElementById('apps-script-code').textContent).then(() => {
-      btn.textContent = '✅ Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.innerHTML = '📋 Copy script'; btn.classList.remove('copied'); }, 2500);
     });
   }
 
